@@ -1,18 +1,34 @@
 import { useEffect, useRef, useState } from 'react'
 import {
+  Activity,
   ArrowUpRight,
+  Cable,
   ChevronRight,
   CircuitBoard,
+  Cpu,
+  Gauge,
   Menu,
   PackageOpen,
+  Radar,
   Search,
+  Workflow,
   X,
+  Zap,
 } from 'lucide-react'
 import { workbooks } from './data/catalog.js'
 
 const normalize = (value) => value.toLocaleLowerCase().trim()
 const INR_PER_USD = 85
 const logoUrl = `${import.meta.env.BASE_URL}embsys-logo.gif`
+
+const rangeIcons = {
+  'plc-control': Cpu,
+  'industrial-io': Radar,
+  'drives-motion': Gauge,
+  'industrial-networking': Cable,
+  'power-panel': Zap,
+  'automation-essentials': Workflow,
+}
 
 const formatPrice = (priceInr, currency) => new Intl.NumberFormat(
   currency === 'INR' ? 'en-IN' : 'en-US',
@@ -21,6 +37,50 @@ const formatPrice = (priceInr, currency) => new Intl.NumberFormat(
 
 function Flag({ country }) {
   return <span className={`flag flag-${country.toLowerCase()}`} aria-hidden="true"><i /></span>
+}
+
+function AutomationScene() {
+  return (
+    <div className="automation-scene" aria-hidden="true">
+      <div className="scene-grid" />
+      <div className="scene-glow scene-glow-one" />
+      <div className="scene-glow scene-glow-two" />
+
+      <div className="controller-unit">
+        <div className="unit-topline"><span>PLC / CPU</span><i>RUN</i></div>
+        <div className="controller-body">
+          <div className="controller-screen">
+            <span>PROCESS_01</span>
+            <svg viewBox="0 0 150 42" focusable="false">
+              <polyline points="0,28 15,28 15,14 32,14 32,31 50,31 50,19 67,19 67,8 84,8 84,25 103,25 103,13 120,13 120,28 150,28" />
+            </svg>
+          </div>
+          <div className="controller-leds">
+            <span /><span /><span /><span /><span /><span />
+          </div>
+          <div className="terminal-row">
+            {Array.from({ length: 8 }, (_, index) => <span key={index} />)}
+          </div>
+        </div>
+      </div>
+
+      <div className="signal-bus signal-bus-sensor"><i /><i /><i /></div>
+      <div className="signal-bus signal-bus-drive"><i /><i /><i /></div>
+
+      <div className="sensor-unit">
+        <div className="sensor-rings"><span /><i /></div>
+        <strong>PROXIMITY</strong>
+        <small>OBJECT DETECTED</small>
+      </div>
+
+      <div className="drive-unit">
+        <div className="motor-core"><span /><i /></div>
+        <div><strong>DRIVE</strong><small>42.6 Hz</small></div>
+      </div>
+
+      <div className="system-status"><Activity size={14} /><span>System online</span><i /></div>
+    </div>
+  )
 }
 
 function App() {
@@ -108,6 +168,10 @@ function App() {
               <small>Products &amp; solutions</small>
             </span>
           </a>
+          <div className="header-status" aria-label="Industrial systems online">
+            <span className="status-pulse" />
+            <div><strong>Systems online</strong><small>Automation catalog</small></div>
+          </div>
           <div className="currency-switch" role="radiogroup" aria-label="Display currency">
             <span className={`currency-slider ${currency === 'USD' ? 'usd' : ''}`} aria-hidden="true" />
             <button type="button" role="radio" aria-checked={currency === 'INR'} className={currency === 'INR' ? 'active' : ''} onClick={(event) => { energize(event); setCurrency('INR') }}>
@@ -124,11 +188,15 @@ function App() {
 
         <nav className={`workbook-nav ${mobileMenuOpen ? 'is-open' : ''}`} aria-label="Product ranges">
           <div className="workbook-scroll container">
-            {workbooks.map((workbook) => (
-              <button type="button" key={workbook.id} className={workbook.id === activeWorkbookId ? 'active' : ''} onClick={(event) => chooseWorkbook(workbook, event)}>
-                <span><strong>{workbook.name}</strong></span>
-              </button>
-            ))}
+            {workbooks.map((workbook) => {
+              const RangeIcon = rangeIcons[workbook.id] ?? CircuitBoard
+              return (
+                <button type="button" key={workbook.id} className={workbook.id === activeWorkbookId ? 'active' : ''} onClick={(event) => chooseWorkbook(workbook, event)}>
+                  <RangeIcon size={18} strokeWidth={1.8} />
+                  <span><strong>{workbook.name}</strong></span>
+                </button>
+              )
+            })}
           </div>
         </nav>
       </header>
@@ -138,14 +206,20 @@ function App() {
           <div className="hero-grid-bg" aria-hidden="true" />
           <div className="container hero-grid">
             <div className="hero-copy">
-              <div className="eyebrow"><span className="signal-line" /> Industrial automation solutions</div>
+              <div className="eyebrow"><span className="signal-line" /> Industrial automation, engineered to perform</div>
               <h1>{activeWorkbook.name}</h1>
               <p>{activeWorkbook.summary}</p>
               <div className="hero-actions">
                 <a className="primary-action" href="#catalog">Explore products <ChevronRight size={16} /></a>
                 <a className="secondary-action" href="mailto:info@embsysindia.com">Talk to a specialist <ArrowUpRight size={15} /></a>
               </div>
+              <div className="capability-row" aria-label="Core capabilities">
+                <span><i /> PLC control</span>
+                <span><i /> Smart sensing</span>
+                <span><i /> Industrial electronics</span>
+              </div>
             </div>
+            <AutomationScene />
           </div>
         </section>
 
